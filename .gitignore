@@ -1,0 +1,19 @@
+# Environment and credentials
+.env
+
+# Runtime state & locks
+state.json
+state.json.tmp
+tapo.lock
+police.pid
+
+# Python virtual environment & cache
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+*.log
