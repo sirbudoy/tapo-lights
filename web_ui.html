@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Sheepserv Lights</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💡</text></svg>" />
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card: #162032;
+      --card-2: #1e293b;
+      --border: #2dd4bf22;
+      --border-subtle: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --green: #22c55e;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #a855f7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 3rem;
+    }
+
+    .app {
+      max-width: 540px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1rem;
+    }
+
+    .title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .title-icon {
+      font-size: 1.65rem;
+      line-height: 1;
+    }
+
+    h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 0.76rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .icon-btn {
+      background: var(--card-2);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
+      border-radius: 0.65rem;
+      padding: 0.5rem 0.7rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      text-decoration: none;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Master Card (Only on All Tab) */
+    .master-card {
+      background: rgba(245, 158, 11, 0.07);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 1.1rem;
+      padding: 0.95rem 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .master-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.65rem;
+    }
+
+    .master-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #fde68a;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .master-warn {
+      font-size: 0.7rem;
+      color: #fbbf24;
+      font-weight: 600;
+    }
+
+    .quick-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .btn {
+      border: 1px solid var(--border-subtle);
+      background: var(--card-2);
+      color: var(--text);
+      border-radius: 0.8rem;
+      padding: 0.75rem 0.6rem;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-on {
+      background: rgba(34, 197, 94, 0.16);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #86efac;
+    }
+
+    .btn-off {
+      background: rgba(239, 68, 68, 0.14);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .btn-sync {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.45);
+      color: #7dd3fc;
+    }
+
+    .btn-police {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(59, 130, 246, 0.25));
+      border-color: rgba(168, 85, 247, 0.5);
+      color: #f8fafc;
+    }
+
+    .btn-police.active {
+      animation: policePulse 0.7s infinite alternate;
+      border-color: #f43f5e;
+    }
+
+    @keyframes policePulse {
+      0% { background: rgba(239, 68, 68, 0.45); box-shadow: 0 0 12px rgba(239, 68, 68, 0.5); }
+      100% { background: rgba(59, 130, 246, 0.45); box-shadow: 0 0 12px rgba(59, 130, 246, 0.5); }
+    }
+
+    /* Room Tabs */
+    .room-tabs {
+      display: flex;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+      background: var(--card);
+      padding: 0.35rem;
+      border-radius: 0.9rem;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .room-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem 0.35rem;
+      border-radius: 0.65rem;
+      font-weight: 700;
+      font-size: 0.84rem;
+      color: var(--muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .room-tab.active {
+      background: var(--accent);
+      color: #082f49;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+    }
+
+    /* Room Card */
+    .room-card {
+      background: var(--card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 1.15rem;
+      padding: 1.1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    .room-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+    }
+
+    .room-name {
+      font-size: 1.12rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .provider-tag {
+      font-size: 0.68rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 0.35rem;
+      background: var(--card-2);
+      color: var(--muted);
+      border: 1px solid var(--border-subtle);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .mode-pill {
+      font-size: 0.72rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    /* Bulb status rows */
+    .bulbs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      margin-bottom: 1rem;
+    }
+
+    .bulb-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.75rem;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 0.75rem;
+      font-size: 0.84rem;
+    }
+
+    .bulb-left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .bulb-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .bulb-name {
+      font-weight: 600;
+    }
+
+    .bulb-ip {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: ui-monospace, monospace;
+    }
+
+    .bulb-state {
+      text-align: right;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+
+    .bulb-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Action Grid */
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.55rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .action-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.1rem;
+    }
+
+    /* Section Label */
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Brightness Slider & Quick % */
+    .slider-wrap {
+      margin-bottom: 1.1rem;
+      background: rgba(15, 23, 42, 0.55);
+      padding: 0.75rem;
+      border-radius: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .slider-wrap:last-child {
+      margin-bottom: 0;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #1e293b 0%, #f8fafc 100%);
+      outline: none;
+      -webkit-appearance: none;
+      margin: 0.5rem 0 0.75rem;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid #0f172a;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+    }
+
+    .pct-pills {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.4rem;
+    }
+
+    .pill-btn {
+      background: var(--card-2);
+      border: 1px solid var(--border-subtle);
+      color: var(--text);
+      padding: 0.45rem 0.25rem;
+      border-radius: 0.55rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .pill-btn:active {
+      background: var(--accent);
+      color: #082f49;
+    }
+
+    /* White Temps Grid */
+    .temp-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.45rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .temp-btn {
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.7rem;
+      padding: 0.55rem 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #0f172a;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    .temp-btn span {
+      display: block;
+      font-size: 0.68rem;
+      opacity: 0.8;
+      font-weight: 600;
+    }
+
+    /* Color Swatches Grid */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .swatch-btn {
+      height: 40px;
+      border-radius: 0.7rem;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+      transition: transform 0.1s ease;
+    }
+
+    .swatch-btn:active {
+      transform: scale(0.92);
+    }
+
+    .custom-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .color-picker-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.55rem 0.8rem;
+      background: var(--card-2);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.7rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .color-picker-label input[type="color"] {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .cmd-input {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border-subtle);
+      border-radius: 0.7rem;
+      padding: 0.55rem 0.75rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .cmd-input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 1.1rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #0f172a;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      padding: 0.65rem 1.1rem;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      transition: transform 0.22s ease;
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title-wrap">
+        <div class="title-icon">💡</div>
+        <div>
+          <h1>Sheepserv Lights</h1>
+          <div class="subtitle" id="phaseText">Loading schedule...</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" onclick="fetchStatus()" title="Refresh status">↻</button>
+        <a href="/" class="icon-btn" title="Sheepserv Hub">🐑</a>
+      </div>
+    </header>
+
+    <!-- Room Selector Tabs -->
+    <div class="room-tabs" id="roomTabs"></div>
+
+    <!-- Room Containers -->
+    <div id="roomsContainer"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API_BASE = window.location.pathname.replace(/\/+$/, '');
+    let currentState = null;
+    let inFlight = false;
+    // Default to 'bedroom' tab so family members don't accidentally hit Office or All OFF
+    let selectedRoom = 'bedroom';
+
+    const ROOM_TITLES = {
+      bedroom: 'Bedroom Lights',
+      bedside: 'Bedside Lamp',
+      office: 'Office Lights',
+    };
+
+    const TAB_LABELS = {
+      bedroom: '🛏️ Bedroom',
+      bedside: '🛋️ Bedside',
+      office: '💻 Office',
+      all_view: '⚡ All Lights',
+    };
+
+    const WHITE_TEMPS = [
+      { label: 'Candle', k: '2500k', bg: '#ffae52' },
+      { label: 'Warm', k: '2700k', bg: '#ffc178' },
+      { label: 'Soft', k: '3000k', bg: '#ffd49e' },
+      { label: 'Reading', k: '4000k', bg: '#ffebd0' },
+      { label: 'Daylight', k: '5500k', bg: '#f4f8ff' },
+      { label: 'Focus', k: '6500k', bg: '#dbeafe' },
+    ];
+
+    const COLORS = [
+      { name: 'Red', cmd: 'red', hex: '#ef4444' },
+      { name: 'Orange', cmd: 'orange', hex: '#f97316' },
+      { name: 'Gold', cmd: 'gold', hex: '#eab308' },
+      { name: 'Lime', cmd: 'lime', hex: '#84cc16' },
+      { name: 'Green', cmd: 'green', hex: '#22c55e' },
+      { name: 'Mint', cmd: 'mint', hex: '#10b981' },
+      { name: 'Cyan', cmd: 'cyan', hex: '#06b6d4' },
+      { name: 'Sky', cmd: 'deepskyblue', hex: '#0ea5e9' },
+      { name: 'Blue', cmd: 'blue', hex: '#3b82f6' },
+      { name: 'Indigo', cmd: 'indigo', hex: '#6366f1' },
+      { name: 'Purple', cmd: 'purple', hex: '#a855f7' },
+      { name: 'Pink', cmd: 'hotpink', hex: '#ec4899' },
+    ];
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    function bulbSwatchColor(b) {
+      if (!b.on) return '#334155';
+      if (b.color_temp && b.color_temp > 0) {
+        if (b.color_temp <= 2800) return '#ffb86c';
+        if (b.color_temp <= 3500) return '#ffd699';
+        if (b.color_temp <= 4500) return '#fff1db';
+        return '#e0f2fe';
+      }
+      if (b.hue !== undefined) {
+        return `hsl(${b.hue}, ${b.sat || 100}%, 55%)`;
+      }
+      return '#38bdf8';
+    }
+
+    async function fetchStatus(silent = false) {
+      if (inFlight && silent) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/status`);
+        const data = await res.json();
+        currentState = data;
+        render(data);
+      } catch (err) {
+        if (!silent) showToast('Error loading status');
+      }
+    }
+
+    async function sendCmd(room, command) {
+      const label = ROOM_TITLES[room] || room.toUpperCase();
+      showToast(`${label}: ${command}`);
+      inFlight = true;
+      try {
+        const res = await fetch(`${API_BASE}/api/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ room, command }),
+        });
+        const data = await res.json();
+        if (data.status) {
+          currentState = data.status;
+          render(data.status);
+        } else {
+          await fetchStatus(true);
+        }
+      } catch (err) {
+        showToast('Command failed');
+      } finally {
+        inFlight = false;
+      }
+    }
+
+    function setRoomFilter(roomKey) {
+      selectedRoom = roomKey;
+      if (currentState) render(currentState);
+    }
+
+    async function testWakeupPreview() {
+      showToast('🌅 Starting 15s Sunrise Preview on bedroom lights...');
+      try {
+        await fetch(`${API_BASE}/api/wakeup/preview`, { method: 'POST' });
+        setTimeout(() => fetchStatus(true), 3000);
+        setTimeout(() => fetchStatus(true), 8000);
+        setTimeout(() => fetchStatus(true), 16000);
+      } catch (err) {
+        showToast('Failed to start preview');
+      }
+    }
+
+    async function saveWakeupSettings(updates) {
+      showToast('Updating wake-up routine...');
+      try {
+        const res = await fetch(`${API_BASE}/api/wakeup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates),
+        });
+        const data = await res.json();
+        if (data.status) {
+          currentState = data.status;
+          render(data.status);
+        }
+        showToast('Wake-up schedule saved!');
+      } catch (err) {
+        showToast('Failed to update wake-up routine');
+      }
+    }
+
+    function renderWakeupCard(w) {
+      if (!w) return '';
+      const enabled = Boolean(w.enabled);
+      const timeVal = w.time || '16:00';
+      const duration = w.duration || 30;
+      const targetBr = w.target_brightness || 80;
+      const targetK = w.target_temp || 6000;
+      const isActive = Boolean(w.is_active);
+      const statusText = w.status_text || 'Automated sunrise dawn simulation for Tapo bedroom lights';
+      const pctProgress = Math.round((w.progress || 0) * 100);
+
+      const durationPills = [15, 30, 45].map(d => `
+        <button class="pill-btn ${duration === d ? 'active' : ''}" style="${duration === d ? 'background:var(--accent); color:#082f49;' : ''}" onclick="saveWakeupSettings({ duration: ${d} })">${d}m${d === 30 ? ' (Rec)' : ''}</button>
+      `).join('');
+
+      const brightnessPills = [50, 80, 100].map(b => `
+        <button class="pill-btn ${targetBr === b ? 'active' : ''}" style="${targetBr === b ? 'background:var(--accent); color:#082f49;' : ''}" onclick="saveWakeupSettings({ target_brightness: ${b} })">${b}%</button>
+      `).join('');
+
+      const progressHtml = isActive ? `
+        <div style="margin-top:0.6rem; background:rgba(15,23,42,0.8); padding:0.65rem 0.8rem; border-radius:0.75rem; border:1px solid rgba(245,158,11,0.4);">
+          <div style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:700; color:#fbbf24; margin-bottom:0.35rem;">
+            <span>🌅 Sunrise in progress</span>
+            <span>${pctProgress}% • ${w.current_kelvin || 2500}K @ ${w.current_brightness || 1}%</span>
+          </div>
+          <div style="width:100%; height:6px; background:#1e293b; border-radius:999px; overflow:hidden;">
+            <div style="width:${pctProgress}%; height:100%; background:linear-gradient(90deg, #f59e0b, #38bdf8);"></div>
+          </div>
+        </div>
+      ` : '';
+
+      return `
+        <div class="room-card" style="border-color: rgba(245, 158, 11, 0.35); background: linear-gradient(180deg, rgba(245, 158, 11, 0.08) 0%, var(--card) 45%);">
+          <div class="room-header">
+            <div class="room-name" style="color:#fde68a;">
+              🌅 Wake-Up Routine
+              <span class="provider-tag" style="border-color:rgba(245,158,11,0.4); color:#fde68a;">TAPO SUNRISE</span>
+            </div>
+            <button class="mode-pill" style="cursor:pointer; background:${enabled ? 'rgba(34,197,94,0.18)' : 'rgba(239,68,68,0.18)'}; color:${enabled ? '#86efac' : '#fca5a5'}; border-color:${enabled ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}"
+              onclick="saveWakeupSettings({ enabled: ${!enabled} })">
+              ${enabled ? '● ENABLED' : '○ DISABLED'}
+            </button>
+          </div>
+
+          <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.85rem; line-height:1.35;">
+            Starts dim warm twilight <strong>${duration} min before</strong> target wake time, easing your brain out of deep sleep into crisp 6000K daylight.
+          </div>
+
+          <div style="background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.06); border-radius:0.85rem; padding:0.85rem; margin-bottom:0.85rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+              <span style="font-size:0.84rem; font-weight:700;">Target Wake-Up Time</span>
+              <input type="time" id="wakeUpTimeInput" value="${timeVal}"
+                style="background:var(--card-2); border:1px solid var(--border-subtle); color:var(--text); padding:0.35rem 0.55rem; border-radius:0.6rem; font-weight:700; font-size:0.95rem; outline:none;"
+                onchange="saveWakeupSettings({ time: this.value })" />
+            </div>
+
+            <div style="margin-bottom:0.75rem;">
+              <div class="control-label" style="margin-bottom:0.35rem;"><span>Dawn Duration</span><span style="color:#fde68a;">Starts ${w.next_start || '15:30'}</span></div>
+              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.4rem;">${durationPills}</div>
+            </div>
+
+            <div>
+              <div class="control-label" style="margin-bottom:0.35rem;"><span>Target Light</span><span style="color:#fde68a;">${targetBr}% (${targetK}K)</span></div>
+              <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.4rem;">${brightnessPills}</div>
+            </div>
+
+            ${progressHtml}
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem; font-size:0.77rem; color:#fef08a; background:rgba(245,158,11,0.12); padding:0.5rem 0.75rem; border-radius:0.65rem;">
+            <span>📅 ${statusText}</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.5rem;">
+            <button class="btn btn-sync" onclick="saveWakeupSettings({ time: document.getElementById('wakeUpTimeInput')?.value })">
+              💾 Save Schedule
+            </button>
+            <button class="btn" style="background:rgba(245,158,11,0.18); border-color:rgba(245,158,11,0.45); color:#fef08a;" onclick="testWakeupPreview()">
+              👁️ Preview (15s)
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRoomCard(room, cfg) {
+      const bulbs = cfg.bulbs || [];
+      const isDimmableOnly = cfg.provider === 'cync';
+      const avgBrightness = bulbs.length
+        ? Math.round(bulbs.reduce((acc, b) => acc + (b.brightness || 50), 0) / bulbs.length)
+        : 50;
+      const resetLabel = cfg.circadian
+        ? '🔄 Circadian'
+        : `🔄 Default (${cfg.default || (isDimmableOnly ? '50%' : '5500k 50')})`;
+      const policeActive = Boolean(cfg.police_pid);
+      const displayTitle = ROOM_TITLES[room] || room;
+      const badgeLabel = cfg.provider === 'cync' ? 'GE CYNC • DIMMABLE' : cfg.provider.toUpperCase();
+
+      const bulbsHtml = bulbs.map(b => {
+        const dotColor = bulbSwatchColor(b);
+        const stateStr = b.error
+          ? `<span style="color:#f87171">OFFLINE</span>`
+          : (!b.on ? `<span style="color:#94a3b8">OFF</span>` : `ON • ${b.summary} • ${b.brightness}%`);
+        return `
+          <div class="bulb-row">
+            <div class="bulb-left">
+              <span class="bulb-dot" style="background:${dotColor}; box-shadow: ${b.on ? '0 0 8px ' + dotColor : 'none'}"></span>
+              <div>
+                <div class="bulb-name">${b.nickname}</div>
+                <div class="bulb-ip">${b.ip}</div>
+              </div>
+            </div>
+            <div>
+              <div class="bulb-state">${stateStr}</div>
+              <div class="bulb-sub">${b.mode_label || ''}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (isDimmableOnly) {
+        return `
+          <div class="room-card">
+            <div class="room-header">
+              <div class="room-name">
+                ${displayTitle}
+                <span class="provider-tag">${badgeLabel}</span>
+              </div>
+              <span class="mode-pill">White Only</span>
+            </div>
+
+            <div class="bulbs-list">${bulbsHtml}</div>
+
+            <div class="action-grid-3">
+              <button class="btn btn-on" onclick="sendCmd('${room}', 'on')">☀️ ON</button>
+              <button class="btn btn-off" onclick="sendCmd('${room}', 'off')">🌙 OFF</button>
+              <button class="btn btn-sync" onclick="sendCmd('${room}', 'default')">${resetLabel}</button>
+            </div>
+
+            <div class="slider-wrap">
+              <div class="control-label">
+                <span>Brightness</span>
+                <span id="br-val-${room}">${avgBrightness}%</span>
+              </div>
+              <input type="range" id="br-${room}" min="1" max="100" value="${avgBrightness}"
+                oninput="document.getElementById('br-val-${room}').textContent = this.value + '%'"
+                onchange="sendCmd('${room}', this.value + '%')" />
+              <div class="pct-pills">
+                <button class="pill-btn" onclick="sendCmd('${room}', '10%')">10%</button>
+                <button class="pill-btn" onclick="sendCmd('${room}', '25%')">25%</button>
+                <button class="pill-btn" onclick="sendCmd('${room}', '50%')">50%</button>
+                <button class="pill-btn" onclick="sendCmd('${room}', '75%')">75%</button>
+                <button class="pill-btn" onclick="sendCmd('${room}', '100%')">100%</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      const tempsHtml = WHITE_TEMPS.map(t => `
+        <button class="temp-btn" style="background:${t.bg}" onclick="sendCmd('${room}', '${t.k} ${ document.getElementById('br-' + room)?.value || avgBrightness }')">
+          ${t.label}
+          <span>${t.k.toUpperCase()}</span>
+        </button>
+      `).join('');
+
+      const colorsHtml = COLORS.map(c => `
+        <button class="swatch-btn" style="background:${c.hex}" onclick="sendCmd('${room}', '${c.cmd} ${ document.getElementById('br-' + room)?.value || avgBrightness }')">
+          ${c.name}
+        </button>
+      `).join('');
+
+      return `
+        <div class="room-card">
+          <div class="room-header">
+            <div class="room-name">
+              ${displayTitle}
+              <span class="provider-tag">${badgeLabel}</span>
+            </div>
+            <span class="mode-pill">${policeActive ? '🚨 POLICE' : (cfg.circadian ? 'Circadian Room' : 'Manual / Default')}</span>
+          </div>
+
+          <div class="bulbs-list">${bulbsHtml}</div>
+
+          <div class="action-grid">
+            <button class="btn btn-on" onclick="sendCmd('${room}', 'on')">☀️ Turn ON</button>
+            <button class="btn btn-off" onclick="sendCmd('${room}', 'off')">🌙 Turn OFF</button>
+            <button class="btn btn-sync" onclick="sendCmd('${room}', 'default')">${resetLabel}</button>
+            <button class="btn btn-police ${policeActive ? 'active' : ''}" onclick="sendCmd('${room}', '${policeActive ? 'stop' : 'police'}')">
+              ${policeActive ? '⏹ Stop Police' : '🚨 Police Mode'}
+            </button>
+          </div>
+
+          <div class="slider-wrap">
+            <div class="control-label">
+              <span>Brightness</span>
+              <span id="br-val-${room}">${avgBrightness}%</span>
+            </div>
+            <input type="range" id="br-${room}" min="1" max="100" value="${avgBrightness}"
+              oninput="document.getElementById('br-val-${room}').textContent = this.value + '%'"
+              onchange="sendCmd('${room}', this.value + '%')" />
+            <div class="pct-pills">
+              <button class="pill-btn" onclick="sendCmd('${room}', '10%')">10%</button>
+              <button class="pill-btn" onclick="sendCmd('${room}', '25%')">25%</button>
+              <button class="pill-btn" onclick="sendCmd('${room}', '50%')">50%</button>
+              <button class="pill-btn" onclick="sendCmd('${room}', '75%')">75%</button>
+              <button class="pill-btn" onclick="sendCmd('${room}', '100%')">100%</button>
+            </div>
+          </div>
+
+          <div class="control-label"><span>White Temperature</span></div>
+          <div class="temp-grid">${tempsHtml}</div>
+
+          <div class="control-label"><span>Colors</span></div>
+          <div class="color-grid">${colorsHtml}</div>
+
+          <div class="custom-row">
+            <label class="color-picker-label">
+              🎨 Custom
+              <input type="color" value="#38bdf8" onchange="sendCmd('${room}', this.value + ' ' + (document.getElementById('br-${room}')?.value || 100))" />
+            </label>
+            <input type="text" class="cmd-input" id="custom-${room}" placeholder="e.g. lavender 60, 3500k 80"
+              onkeydown="if(event.key==='Enter'){ sendCmd('${room}', this.value); this.value=''; }" />
+            <button class="icon-btn" onclick="const inp=document.getElementById('custom-${room}'); if(inp.value){ sendCmd('${room}', inp.value); inp.value=''; }">Go</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function render(data) {
+      const p = data.phase || {};
+      const targetStr = p.on ? `${p.color_temp}K @ ${p.brightness}%` : 'OFF';
+      document.getElementById('phaseText').textContent = `Office Schedule: ${p.phase || ''} (${targetStr})`;
+
+      const preferredOrder = ['bedroom', 'bedside', 'office'];
+      const availableRooms = Object.keys(data.rooms || {});
+      const orderedRooms = [
+        ...preferredOrder.filter(r => availableRooms.includes(r)),
+        ...availableRooms.filter(r => !preferredOrder.includes(r))
+      ];
+
+      if (selectedRoom !== 'all_view' && !orderedRooms.includes(selectedRoom)) {
+        selectedRoom = orderedRooms[0] || 'all_view';
+      }
+
+      const tabsEl = document.getElementById('roomTabs');
+      tabsEl.innerHTML = [
+        ...orderedRooms.map(r => `<button class="room-tab ${selectedRoom === r ? 'active' : ''}" onclick="setRoomFilter('${r}')">${TAB_LABELS[r] || r}</button>`),
+        `<button class="room-tab ${selectedRoom === 'all_view' ? 'active' : ''}" onclick="setRoomFilter('all_view')">${TAB_LABELS.all_view}</button>`
+      ].join('');
+
+      const container = document.getElementById('roomsContainer');
+
+      if (selectedRoom === 'all_view') {
+        const masterHtml = `
+          <div class="master-card">
+            <div class="master-header">
+              <div class="master-title">⚡ Master Controls (All Rooms)</div>
+              <div class="master-warn">Includes Office Work Area</div>
+            </div>
+            <div class="quick-bar">
+              <button class="btn btn-on" onclick="sendCmd('all', 'on')">☀️ All ON</button>
+              <button class="btn btn-off" onclick="sendCmd('all', 'off')">🌙 All OFF</button>
+              <button class="btn btn-sync" onclick="sendCmd('all', 'default')">🔄 Reset All</button>
+            </div>
+          </div>
+        `;
+        container.innerHTML = masterHtml + orderedRooms.map(r => {
+          let card = renderRoomCard(r, data.rooms[r]);
+          if (r === 'bedroom') card += renderWakeupCard(data.wakeup);
+          return card;
+        }).join('');
+      } else if (selectedRoom === 'bedroom' && data.rooms.bedroom) {
+        // On Bedroom tab, show Bedroom (Tapo) card, Wake-Up card, and Bedside Lamp (GE) card
+        const bedsideHtml = data.rooms.bedside ? renderRoomCard('bedside', data.rooms.bedside) : '';
+        container.innerHTML = renderRoomCard('bedroom', data.rooms.bedroom) + renderWakeupCard(data.wakeup) + bedsideHtml;
+      } else {
+        container.innerHTML = orderedRooms
+          .filter(r => r === selectedRoom)
+          .map(r => renderRoomCard(r, data.rooms[r]))
+          .join('');
+      }
+    }
+
+    fetchStatus(false);
+    setInterval(() => fetchStatus(true), 30000);
+  </script>
+</body>
+</html>

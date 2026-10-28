@@ -25,43 +25,45 @@ Built for shift workers operating across inverted time zones (e.g., working US h
 
 ## CLI Usage
 
-Run `lights` with no arguments to sync back to the circadian schedule, or specify any color/brightness:
+Run `lights <room>` with no extra arguments to sync that room back to the circadian schedule, or specify any color/brightness:
 
 ```bash
-# Return to the active circadian schedule
-lights
-lights schedule
+# Return bedroom lights to the active circadian schedule
+lights bedroom
+lights bedroom schedule
 
 # Named colors with optional brightness (1-100%)
-lights green 60
-lights purple 40
-lights cyan 80
-lights gold 50
-lights hotpink
+lights bedroom green 60
+lights bedroom purple 40
+lights bedroom cyan 80
+lights bedroom gold 50
+lights bedroom hotpink
 
 # Hex codes
-lights ff8800 60
-lights '#33ff99' 50
+lights bedroom ff8800 60
+lights bedroom '#33ff99' 50
 
 # White temperature presets & direct Kelvin
-lights warm 75       # 2700K at 75%
-lights soft 80       # 3000K at 80%
-lights daylight 100  # 5500K at 100%
-lights cool 50       # 6500K at 50%
-lights 4000k 60      # Kelvin directly
+lights bedroom warm 75       # 2700K at 75%
+lights bedroom soft 80       # 3000K at 80%
+lights bedroom daylight 100  # 5500K at 100%
+lights bedroom cool 50       # 6500K at 50%
+lights bedroom 4000k 60      # Kelvin directly
 
 # Brightness slider (keeps current color)
-lights 50%
-lights 80
+lights bedroom 50%
+lights bedroom 80
 
 # Power & status
-lights on
-lights off
-lights status
+lights bedroom on
+lights bedroom off
+lights bedroom status
+lights status                # Status across all rooms
+lights all off               # Target all rooms at once
 
 # Emergency police flash
-lights police [--interval 0.25]
-lights stop
+lights bedroom police [--interval 0.25]
+lights bedroom stop
 ```
 
 ---

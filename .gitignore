@@ -1,11 +1,13 @@
 # Environment and credentials
 .env
+cync_token.json
 
 # Runtime state & locks
 state.json
 state.json.tmp
 tapo.lock
 police.pid
+police_*.pid
 
 # Python virtual environment & cache
 .venv/
